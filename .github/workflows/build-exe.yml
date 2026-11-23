@@ -5,7 +5,26 @@ on:
   workflow_dispatch:
 
 jobs:
+  thumb-dll:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+      - uses: actions/setup-python@v5
+        with:
+          python-version: "3.12"
+      - name: Cross-compile thumbnail provider DLL
+        run: |
+          pip install ziglang
+          python -m ziglang c++ -target x86_64-windows-gnu -shared -O2 -DUNICODE -D_UNICODE \
+            thumbprov.cpp thumbprov.def -o PdfUnlockThumb.dll \
+            -lgdiplus -lole32 -lshlwapi -ladvapi32 -luser32 -lgdi32 -luuid
+      - uses: actions/upload-artifact@v4
+        with:
+          name: thumb-dll
+          path: PdfUnlockThumb.dll
+
   build:
+    needs: thumb-dll
     runs-on: windows-latest
     steps:
       - uses: actions/checkout@v4
@@ -16,8 +35,12 @@ jobs:
         run: |
           python -m pip install --upgrade pip
           pip install -r requirements.txt pyinstaller
-      - name: Build exe
-        run: pyinstaller --onefile --windowed --name PdfUnlock --icon icon.ico --add-data "icon.png;." --collect-all pymupdf app.py
+      - name: Build app (folder build, fast startup)
+        run: pyinstaller --noconfirm --onedir --windowed --name PdfUnlock --icon icon.ico --add-data "icon.png;." --collect-all pymupdf app.py
+      - uses: actions/download-artifact@v4
+        with:
+          name: thumb-dll
+          path: dist/PdfUnlock
       - name: Install Inno Setup
         run: choco install innosetup -y --no-progress
       - name: Build installer
@@ -25,6 +48,4 @@ jobs:
       - uses: actions/upload-artifact@v4
         with:
           name: PdfUnlock-windows
-          path: |
-            dist/PdfUnlock-Setup.exe
-            dist/PdfUnlock.exe
+          path: dist/PdfUnlock-Setup.exe

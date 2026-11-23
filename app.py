@@ -321,6 +321,13 @@ class App(tk.Tk):
 
 
 def main():
+    # Explorer thumbnail provider calls:  PdfUnlock.exe --thumb <pdf> <png> <size>
+    if len(sys.argv) >= 5 and sys.argv[1] == "--thumb":
+        try:
+            ok = pdfcore.make_thumbnail(sys.argv[2], sys.argv[3], int(sys.argv[4]))
+        except Exception:
+            ok = False
+        sys.exit(0 if ok else 1)
     _dpi_aware()
     start = sys.argv[1] if len(sys.argv) > 1 else None
     App(start).mainloop()

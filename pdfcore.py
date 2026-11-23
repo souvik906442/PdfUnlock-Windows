@@ -135,3 +135,36 @@ def unlock(path: str, password: str):
         return OK, data
     except Exception as e:  # noqa: BLE001
         return ERROR, str(e)
+
+
+# ------------------------------------------------------------------ thumbnails
+def _locked_thumbs_enabled() -> bool:
+    """Installer option: also show thumbnails of password-protected PDFs whose password is saved."""
+    try:
+        import winreg
+        with winreg.OpenKey(winreg.HKEY_CURRENT_USER, r"Software\PdfUnlock") as k:
+            return int(winreg.QueryValueEx(k, "LockedThumbnails")[0]) == 1
+    except Exception:
+        return False
+
+
+def make_thumbnail(pdf_path: str, png_path: str, size: int) -> bool:
+    """Renders page 1 as a PNG whose longest side is `size` px. Used by the Explorer thumbnail provider."""
+    doc = fitz.open(pdf_path)
+    try:
+        if doc.needs_pass:
+            if not _locked_thumbs_enabled():
+                return False
+            pw = PasswordStore().get(fingerprint(pdf_path))
+            if not pw or not doc.authenticate(pw):
+                return False
+        if doc.page_count < 1:
+            return False
+        page = doc[0]
+        r = page.rect
+        scale = max(size, 16) / max(r.width, r.height)
+        pix = page.get_pixmap(matrix=fitz.Matrix(scale, scale), alpha=False)
+        pix.save(png_path)
+        return True
+    finally:
+        doc.close()
