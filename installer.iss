@@ -57,6 +57,7 @@ Root: HKCU; Subkey: "Software\Classes\CLSID\{{B4E3C8A2-6D1F-4F5B-9A47-2C7E5D9F1A
 Root: HKCU; Subkey: "Software\Classes\CLSID\{{B4E3C8A2-6D1F-4F5B-9A47-2C7E5D9F1A63}\InprocServer32"; ValueType: string; ValueName: "ThreadingModel"; ValueData: "Apartment"
 Root: HKCU; Subkey: "Software\Classes\PdfUnlock.pdf\ShellEx\{{e357fccd-a995-4576-b01f-234630154e96}"; ValueType: string; ValueName: ""; ValueData: "{{B4E3C8A2-6D1F-4F5B-9A47-2C7E5D9F1A63}"
 Root: HKCU; Subkey: "Software\Classes\Applications\PdfUnlock.exe\ShellEx\{{e357fccd-a995-4576-b01f-234630154e96}"; ValueType: string; ValueName: ""; ValueData: "{{B4E3C8A2-6D1F-4F5B-9A47-2C7E5D9F1A63}"
+Root: HKCU; Subkey: "Software\Classes\.pdf\ShellEx\{{e357fccd-a995-4576-b01f-234630154e96}"; ValueType: string; ValueName: ""; ValueData: "{{B4E3C8A2-6D1F-4F5B-9A47-2C7E5D9F1A63}"; Flags: uninsdeletekey
 
 [Run]
 Filename: "{app}\PdfUnlock.exe"; Description: "Launch PDF Unlock"; Flags: nowait postinstall skipifsilent
